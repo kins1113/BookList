@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="config.mybatis.mapper.oracle.HomeList">
+	
+	<select id="selectAllHomeList" resultType="map" parameterType="map">
+	select * from
+	(
+		select * from
+			(
+			select A.*, rownum as RNUM from
+				(
+				select * from
+					(
+						select h.h_no, h.h_name, h.H_PRICE, h.h_getdate, h.maker, h.del_ck, c.cate_name, c.USE_CK from HomeList h join categorie c
+						on h.CATE_NO = c.CATE_NO
+						where h.del_ck='X' 
+						<if test="cateNo!=0 and cateNo != null">
+							and c.CATE_NO=#{cateNo}
+						</if>
+						order by h.h_no desc
+					) 
+				)A
+			)
+		where RNUM>#{firstRecordIndex}
+		and RNUM <![CDATA[<]]>=#{firstRecordIndex} + #{recordCountPerPage}
+	)
+	</select>
+	
+	
+	<select id="selectGetTotalCount" resultType="int" parameterType="map">
+		select count(*) from HomeList h join categorie c
+		on h.CATE_NO = c.CATE_NO
+		where h.del_ck='X'
+			<if test="cateNo!=0">
+				and c.CATE_NO=#{cateNo}
+			</if>
+		order by h.h_no desc
+	</select>
+	
+	<select id="selectHomeListTrash" resultType="map" parameterType="map">
+	select * from
+	(
+		select * from
+			(
+			select A.*, rownum as RNUM from
+				(
+				select * from
+					(
+						select h.h_no, h.h_name, h.H_PRICE, h.h_getdate, h.maker, h.del_ck, c.cate_name from HomeList h join categorie c
+						on h.CATE_NO = c.CATE_NO
+						where h.del_ck='Y'
+						order by h.h_no desc
+					) 
+				)A
+			)
+		where RNUM>#{firstRecordIndex}
+		and RNUM <![CDATA[<]]>=#{firstRecordIndex} + #{recordCountPerPage}
+	)
+	</select>
+	
+	<select id="selectGetTotalCountTrash" resultType="int">
+		select count(*) from homelist where DEL_CK='Y'
+	</select>
+		
+	
+
+	<insert id="insertHomeList" parameterType="homeListDTO">
+		<selectKey keyProperty="hNo" resultType="int" order="BEFORE">
+				select homelist_seq.nextval from dual
+		</selectKey>
+		insert into homelist (H_NO, H_NAME, H_PRICE, H_GETDATE, MAKER, DEL_CK, CATE_NO)
+		values (#{hNo}, #{hName}, #{hPrice},
+		 		<if test="#{hGetDate} == null">
+		 			sysdate, 
+		 		</if>
+		 		<if test="#{hGetDate} != null">
+		 			#{hGetDate},
+				</if>
+		 		#{maker}, 'X', #{kateNo})
+	</insert>
+	
+	<update id="updateDelCk" parameterType="int">
+		update homelist
+		set DEL_CK='Y'
+		where H_NO=#{NO}
+	</update>
+
+	<delete id="deleteHomeList" parameterType="int">
+		delete from HomeList where H_no = #{no}
+	</delete>
+
+</mapper>
+
+
+
+
+
+
+

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="config.mybatis.mapper.oracle.categorie">
+	
+	<select id="selectAllCategorie" resultType="CategorieDTO">
+		select * from Categorie order by use_ck desc
+	</select>
+    
+    <insert id="insertCategorie" parameterType="categorieDTO" >
+    	<selectKey keyProperty="cateNo" order="BEFORE" resultType="int">
+			select Categorie_seq.nextval from dual
+		</selectKey> 
+	    	insert into Categorie (CATE_NO,CATE_NAME,CATE_INFO,USE_CK)
+			values(#{cateNo},#{cateName},#{cateInfo},#{useCk})
+    </insert>
+
+	<select id="selectNameCheck" parameterType="String" resultType="int">
+			select count(*) from categorie where CATE_NAME=#{name}
+	</select>
+	
+	<update id="updateUseCk" parameterType="map" >
+			update categorie
+			set USE_CK =
+				<if test='useCk=="n"'>'y'</if>
+				<if test='useCk=="y"'>'n'</if>
+			where CATE_NO=#{cateNo}
+	</update>
+</mapper>
+
+
+
+
+
+
+
+
+
